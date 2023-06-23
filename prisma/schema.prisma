@@ -1,0 +1,40 @@
+// Configure Prisma to use PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// User Model
+model User {
+  id              String    @id @default(uuid())
+  firstName       String
+  lastName        String
+  email           String    @unique
+  birthdate       DateTime  @db.Date
+  anniversaryDate DateTime? @db.Date
+  location        String
+  timezone        String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// Event Model
+model Event {
+  id               String   @id @default(uuid())
+  userId           String
+  type             String
+  isDynamicEvent   Boolean  @default(true)
+  message          Json
+  schedulerId      String
+  schedulerOptions Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("events")
+}
