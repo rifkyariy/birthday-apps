@@ -7,14 +7,6 @@ export class EventRepository {
     this.prisma = prisma;
   }
 
-  getEvents = (): Promise<Event[]> => {
-    return this.prisma.event.findMany();
-  }
-
-  getEventById = (id: string): Promise<Event | null> => {
-    return this.prisma.event.findUnique({ where: { id } });
-  }
-
   createEvent = (data: Prisma.EventCreateInput): Promise<Event> => {
     return this.prisma.event.create({ data });
   }

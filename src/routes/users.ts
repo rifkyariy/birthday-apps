@@ -34,14 +34,6 @@ const userService = new UserService(userRepository, eventService);
 const userController = new UserController(userService);
 
 // routes
-router.get('/', async (req, res) => {
-  await userController.getUsers(req, res);
-});
-
-router.get('/:id', async (req, res) => {
-  await userController.getUserById(req, res);
-});
-
 router.post('/', async (req, res) => {
   await userController.createUser(req, res);
 });

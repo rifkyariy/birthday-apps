@@ -24,23 +24,6 @@ export class UserController extends BaseController {
     return timezone || moment.tz.guess();
   };
 
-  getUsers = async (req: Request, res: Response): Promise<void> => {
-    await this.handleRequest(req, res, async () => {
-      return this.service.getUsers();
-    });
-  };
-
-  getUserById = async (req: Request, res: Response): Promise<void> => {
-    await this.handleRequest(req, res, async () => {
-      const { id } = req.params;
-      const user = await this.service.getUserById(id);
-      if (!user) {
-        this.handleNotFound(req, res, 'User not found');
-      }
-      return user;
-    });
-  };
-
   createUser = async (req: Request, res: Response): Promise<void> => {
     await this.handleRequest(req, res, async () => {
       let { firstName, lastName, email, birthdate, location } = req.body;

@@ -14,14 +14,6 @@ export class UserService {
     this.eventService = eventService;
   }
 
-  getUsers = (): Promise<User[]> => {
-    return this.userRepository.getUsers();
-  };
-
-  getUserById = (id: string): Promise<User | null> => {
-    return this.userRepository.getUserById(id);
-  };
-
   createUser = async (data: Prisma.UserCreateInput): Promise<User> => {
     const user = await this.userRepository.createUser(data);
     await this.createEvent(user, 'birthday');
