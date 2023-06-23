@@ -1,6 +1,7 @@
 const { Queue } = require('bullmq')
 import { Job } from 'bullmq';
 import {MessageService} from './messageService';
+import { Event } from '@prisma/client';
 
 
 export class SchedulerService {
@@ -18,27 +19,31 @@ export class SchedulerService {
     };
   }
 
-  async createScheduler(schedulerId:string, payload:any, schedulerOptions:any): Promise<void> {
+  // Create Scheduler
+  async createScheduler(event:Event): Promise<void> {
+    const schedulerId = event.schedulerId;
+    const payload = event.message;
+    const schedulerOptions = event.schedulerOptions;
+
+    console.log(payload, schedulerOptions);
 
     // testing using cron timezone
     const testTZ = { 
       repeat: { 
         tz: 'Asia/Jakarta', 
-        cron: '20 8 23 6 *' ,
+        cron: '49 12 23 6 *',
         limit: 5
       }
     };
 
-    // 
+    // testing using every
     const queueScheduler = new Queue('emailQueue',  this.connectionOptions);
-    queueScheduler.add(schedulerId, payload, schedulerOptions)
+    queueScheduler.add(event.schedulerId, payload, testTZ)
     this.messageService.addMailWorker(schedulerId, payload);
 
     const jobs: Job[] = await queueScheduler.getRepeatableJobs();
-    console.log('list of jobs', jobs);
 
     console.log('scheduler created', schedulerId, payload, schedulerOptions);
-    return 
   }
 
   async deleteScheduler(schedulerId:string): Promise<void> {
@@ -46,8 +51,8 @@ export class SchedulerService {
     console.log('deleteScheduler', schedulerId);
 
     const jobs: any = await queueScheduler.getRepeatableJobs();
-    console.log('list of jobs', jobs);
 
+    // find by key
     for(let i = 0; i < jobs.length; i++) {
       if(jobs[i].name === schedulerId){
         await queueScheduler.removeRepeatableByKey(jobs[i].key);

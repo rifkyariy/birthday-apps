@@ -49,11 +49,9 @@ export class EventService {
 
 
   // SCHDULER
-
-
   // Create Scheduler
   createScheduler = async (event: Event): Promise<void> => {
-    const schedule = await this.schedulerService.createScheduler(event.schedulerId, event.message, event.schedulerOptions);
+    const schedule = await this.schedulerService.createScheduler(event);
     return schedule;
   }
 

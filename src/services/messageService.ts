@@ -1,6 +1,4 @@
 import { Worker } from "bullmq";
-import {Prisma} from '@prisma/client';
-
 export class MessageService {
   addMailWorker = async (schedulerId:string, payload:any): Promise<void> => {
     const worker = new Worker('emailQueue', async job => {

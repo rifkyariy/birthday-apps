@@ -4,7 +4,7 @@ export interface BaseResponse<T> {
   status: number;
   message: string;
   data?: T;
-  error?:  any;
+  error?: object;
 }
 
 export abstract class BaseController {

@@ -27,7 +27,9 @@ export class UserService {
     await this.createEvent(user, 'birthday');
 
     // if anniversary is true, create anniversary event
-    // 
+    if (user.anniversaryDate) {
+      await this.createEvent(user, 'anniversary');
+    }
 
     return user;
   };
@@ -38,6 +40,10 @@ export class UserService {
   ): Promise<User | null> => {
     const user = await this.userRepository.updateUser(id, data);
     await this.updateEvent(user, 'birthday');
+
+    if (user?.anniversaryDate) {
+      await this.updateEvent(user, 'anniversary');
+    }
 
     return user;
   };
