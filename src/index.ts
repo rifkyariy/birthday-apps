@@ -1,39 +1,39 @@
 import express, { Request, Response, NextFunction } from 'express';
-import userRoutes from './routes/userRoutes';
+import routes from './routes';
 
 const app = express();
 app.use(express.json());
 
 
-app.use('/users', userRoutes);
+app.use(routes);
 
 app.get('/', (req, res) => {
   res.send('It`s works!');
 });
 
-app.get('/test/messages', async (req, res) => {
-  const url = `${process.env.EMAIL_SERVICE_URL}/send-email`;
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      email: 'test@digitalenvision.com.au',
-      message: 'Hi, nice to meet you.'
-    })
-  };
+// app.get('/test/messages', async (req, res) => {
+//   const url = `${process.env.EMAIL_SERVICE_URL}/send-email`;
+//   const requestOptions = {
+//     method: 'POST',
+//     headers: {
+//       'Accept': 'application/json',
+//       'Content-Type': 'application/json'
+//     },
+//     body: JSON.stringify({
+//       email: 'test@digitalenvision.com.au',
+//       message: 'Hi, nice to meet you.'
+//     })
+//   };
 
-  fetch(url, requestOptions)
-    .then(response => response.json())
-    .then(data => {
-      console.log('Response:', data);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-});
+//   fetch(url, requestOptions)
+//     .then(response => response.json())
+//     .then(data => {
+//       console.log('Response:', data);
+//     })
+//     .catch(error => {
+//       console.error('Error:', error);
+//     });
+// });
 
 // Error handler middleware for handling unknown routes
 app.use((req: Request, res: Response, next: NextFunction) => {

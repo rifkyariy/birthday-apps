@@ -1,5 +1,7 @@
 const { Queue } = require('bullmq')
+import { Job } from 'bullmq';
 import {MessageService} from './messageService';
+
 
 export class SchedulerService {
   private messageService: MessageService;
@@ -16,10 +18,9 @@ export class SchedulerService {
     };
   }
 
-  async createScheduler(schedulerId:string, payload:any, schedulerOptions:any): Promise<any> {
-    console.log('createScheduler', schedulerId, payload, schedulerOptions);
+  async createScheduler(schedulerId:string, payload:any, schedulerOptions:any): Promise<void> {
 
-    // testing using
+    // testing using cron timezone
     const testTZ = { 
       repeat: { 
         tz: 'Asia/Jakarta', 
@@ -30,13 +31,30 @@ export class SchedulerService {
 
     // 
     const queueScheduler = new Queue('emailQueue',  this.connectionOptions);
-    queueScheduler.add(schedulerId, payload, testTZ)
+    queueScheduler.add(schedulerId, payload, schedulerOptions)
     this.messageService.addMailWorker(schedulerId, payload);
+
+    const jobs: Job[] = await queueScheduler.getRepeatableJobs();
+    console.log('list of jobs', jobs);
+
+    console.log('scheduler created', schedulerId, payload, schedulerOptions);
+    return 
   }
 
-  async deleteScheduler(schedulerId:any, payload:any, schedulerOptions:any): Promise<any> {
-    // return await this.queue.add(jobData, { delay });
-    console.log('deleteScheduler', schedulerId, payload, schedulerOptions);
+  async deleteScheduler(schedulerId:string): Promise<void> {
+    const queueScheduler = new Queue('emailQueue',  this.connectionOptions);
+    console.log('deleteScheduler', schedulerId);
+
+    const jobs: any = await queueScheduler.getRepeatableJobs();
+    console.log('list of jobs', jobs);
+
+    for(let i = 0; i < jobs.length; i++) {
+      if(jobs[i].name === schedulerId){
+        await queueScheduler.removeRepeatableByKey(jobs[i].key);
+      }
+    }
+
+    console.log('scheduler deleted', schedulerId);
   }
 
 }

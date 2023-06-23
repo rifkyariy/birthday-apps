@@ -34,7 +34,7 @@ export class EventService {
   updateEvent = async (
     id: string,
     data: Prisma.EventUpdateInput
-  ): Promise<any> => {
+  ): Promise<Event> => {
     const event = await this.eventRepository.updateEvent(id, data);
 
     await this.deleteScheduler(event);
@@ -49,14 +49,16 @@ export class EventService {
 
 
   // SCHDULER
+
+
   // Create Scheduler
-  createScheduler = async (event: Event): Promise<any> => {
+  createScheduler = async (event: Event): Promise<void> => {
     const schedule = await this.schedulerService.createScheduler(event.schedulerId, event.message, event.schedulerOptions);
     return schedule;
   }
 
-  deleteScheduler = async (event: Event): Promise<any> => {
-    const schedule = await this.schedulerService.deleteScheduler(event.schedulerId, event.message, event.schedulerOptions);
+  deleteScheduler = async (event: Event): Promise<void> => {
+    const schedule = await this.schedulerService.deleteScheduler(event.schedulerId);
     return schedule;
   }
 }

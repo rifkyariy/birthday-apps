@@ -52,7 +52,7 @@ export class UserService {
   
   // EVENTS
   // Additional methods
-
+  
   createEvent = (user:User, type:string): Promise<any> => {
     return this.eventService.createEvent({
       userId: user.id,
