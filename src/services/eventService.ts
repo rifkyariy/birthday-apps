@@ -37,13 +37,14 @@ export class EventService {
   ): Promise<Event> => {
     const event = await this.eventRepository.updateEvent(id, data);
 
-    await this.deleteScheduler(event);
+    await this.deleteScheduler(event.schedulerId);
     await this.createScheduler(event);
 
     return event;
   };
 
-  deleteEvent = (id: string): Promise<Event | null> => {
+  deleteEvent = async (id: string, schedulerId:string): Promise<Event | null> => {
+    await this.deleteScheduler(schedulerId);
     return this.eventRepository.deleteEvent(id);
   };
 
@@ -55,8 +56,8 @@ export class EventService {
     return schedule;
   }
 
-  deleteScheduler = async (event: Event): Promise<void> => {
-    const schedule = await this.schedulerService.deleteScheduler(event.schedulerId);
+  deleteScheduler = async (schedulerId: string): Promise<void> => {
+    const schedule = await this.schedulerService.deleteScheduler(schedulerId);
     return schedule;
   }
 }

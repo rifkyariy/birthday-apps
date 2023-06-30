@@ -1,12 +1,12 @@
 import { Worker } from "bullmq";
 export class MessageService {
-  addMailWorker = async (schedulerId:string, payload:any): Promise<void> => {
+  addMailWorker = async (payload:any): Promise<any> => {
     const worker = new Worker('emailQueue', async job => {
-      await this.sendMail(payload);
+      return await this.sendMail(payload);
     })
   }
 
-  sendMail = async (payload:any): Promise<void> => {
+  sendMail = async (payload:any): Promise<any> => {
     const url = `${process.env.EMAIL_SERVICE_URL}/send-email`;
     const requestOptions = {
       method: 'POST',
@@ -20,15 +20,21 @@ export class MessageService {
       })
     };
 
-    fetch(url, requestOptions)
-      .then(response => response.json())
-      .then(data => {
+    console.log('send mail')
+    try {
+      const response = await fetch(url, requestOptions);
+      
+      if (response.ok) {
+        const data = await response.json();
         console.log('Response:', data);
-      })
-      .catch(error => {
-        console.error('Error:', error.message);
-        throw error;
-      });
+      } else {
+        throw new Error('Server encountered some errors, please try again later');
+      }
+    } catch (error:any) {
+      console.error('Error:', error.message);
+      
+      // throw error;
+      throw new Error(error);
+    }    
   } 
-
 }

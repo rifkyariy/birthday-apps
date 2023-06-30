@@ -30,11 +30,21 @@ export class UserService {
     id: string,
     data: Prisma.UserUpdateInput
   ): Promise<User | null> => {
+    const databefore = await this.userRepository.getUserById(id);
     const user = await this.userRepository.updateUser(id, data);
     await this.updateEvent(user, 'birthday');
-
+    
+    // if anniversary is true, create anniversary event or update if exists 
     if (user?.anniversaryDate) {
-      await this.updateEvent(user, 'anniversary');
+      if(databefore?.anniversaryDate) {
+        await this.updateEvent(user, 'anniversary');
+      }else{
+        await this.createEvent(user, 'anniversary');
+      }
+    }else{
+      if(databefore?.anniversaryDate) {
+        await this.deleteEvent(user, 'anniversary');
+      }
     }
 
     return user;
@@ -42,59 +52,81 @@ export class UserService {
 
   deleteUser = async (id: string): Promise<User | null> => {
     const deletedUser = await this.userRepository.deleteUser(id);
-    await this.deleteEvent(deletedUser);
+    await this.deleteEvent(deletedUser, 'birthday');
+
+    if (deletedUser?.anniversaryDate) {
+      await this.deleteEvent(deletedUser, 'anniversary');
+    }
     return deletedUser;
   };
 
-
-  
   // EVENTS
   // Additional methods
-  
   createEvent = (user:User, type:string): Promise<any> => {
+   const date = type === 'birthday' ? user.birthdate : user.anniversaryDate;
+   const eventDate = date?.getDate();
+   const eventMonth = date?.getMonth() ?? 0 ;
+
     return this.eventService.createEvent({
       userId: user.id,
       type: type,
       isDynamicEvent: true,
       message: {
-        data: `Hey, ${user.firstName} it's your birthday`,
+        data: `Hey, ${user.firstName} it's your ${type}`,
         email: user.email,
       },
-      schedulerId: `${user.id}-birthday`,
+      schedulerId: `${user.id}-${type}`,
       schedulerOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 1000, // 1, 2, 4,
+        },
         repeat: {
           tz: user.timezone,
-          cron: `0 9 ${user.birthdate.getDate()} ${user.birthdate.getMonth() + 1} *`,
+          cron: `0 9 ${eventDate} ${eventMonth + 1} *`,
+          limit: 3
         },
       },
     });
   }
 
   updateEvent = async (user:any, type:string): Promise<any> => {
-    const event = await this.eventService.getEventBySchedulerId(`${user.id}-birthday`);
+    const date = type === 'birthday' ? user.birthdate : user.anniversaryDate;
+    const eventDate = date?.getDate();
+    const eventMonth = date?.getMonth() ?? 0 ;
+
+    const event = await this.eventService.getEventBySchedulerId(`${user.id}-${type}`);
     
     return this.eventService.updateEvent(event[0].id, {
       userId: user.id,
       type: type,
       isDynamicEvent: true,
       message: {
-        data: `Hey, ${user.firstName} it's your birthday`,
+        data: `Hey, ${user.firstName} it's your ${type}`,
         email: user.email,
       },
-      schedulerId: `${user.id}-birthday`,
+      schedulerId: `${user.id}-${type}`,
       schedulerOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 1000, // 1, 2, 4,
+        },
         repeat: {
           tz: user.timezone,
-          cron: `0 9 ${user.birthdate.getDate()} ${user.birthdate.getMonth() + 1} *`,
+          cron: `0 9 ${eventDate} ${eventMonth + 1} *`,
+          limit: 3
         },
       },
     });
   }
 
-  deleteEvent = async (user:any): Promise<any> => {
-    const event = await this.eventService.getEventBySchedulerId(`${user.id}-birthday`);
+  deleteEvent = async (user:any, type:string): Promise<any> => {
+    const schedulerId = `${user.id}-${type}`;
+    const event = await this.eventService.getEventBySchedulerId(schedulerId);
 
-    return this.eventService.deleteEvent(event[0].id);
+    return this.eventService.deleteEvent(event[0].id, schedulerId);
   }
 
 

@@ -7,6 +7,10 @@ export class UserRepository {
     this.prisma = prisma;
   }
 
+  getUserById = (id: string): Promise<User | null> => {
+    return this.prisma.user.findUnique({ where: { id } });
+  };
+
   createUser = (data: Prisma.UserCreateInput): Promise<User> => {
     return this.prisma.user.create({ data });
   };

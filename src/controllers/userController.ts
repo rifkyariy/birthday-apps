@@ -12,7 +12,7 @@ export class UserController extends BaseController {
     this.service = userService;
   }
 
-  private searchTimezonByLocation = (location: string): string => {
+  private searchTimezoneByLocation = (location: string): string => {
     // Replace spaces with underscores
     location = location.replace(/ /g, '_');
 
@@ -32,8 +32,24 @@ export class UserController extends BaseController {
       birthdate = new Date(birthdate);
 
       // get timezone from location string or client timezone
-      const timezone = this.searchTimezonByLocation(location);
+      const timezone = this.searchTimezoneByLocation(location);
 
+      // adding anniversaryDate to user
+      if(req.body.anniversaryDate) {
+        let { anniversaryDate } = req.body;
+        anniversaryDate = new Date(anniversaryDate);
+        return this.service.createUser({
+          firstName,
+          lastName,
+          email,
+          birthdate,
+          location,
+          timezone,
+          anniversaryDate,
+        });
+      }
+
+      // create user
       return this.service.createUser({
         firstName,
         lastName,
@@ -41,7 +57,6 @@ export class UserController extends BaseController {
         birthdate,
         location,
         timezone,
-        
       });
     });
   };
@@ -55,8 +70,24 @@ export class UserController extends BaseController {
       birthdate = new Date(birthdate);
 
       // get timezone from location string or client timezone
-      const timezone = this.searchTimezonByLocation(location);
+      const timezone = this.searchTimezoneByLocation(location);
+    
+      // adding anniversaryDate to user
+      if(req.body.anniversaryDate) {
+        let { anniversaryDate } = req.body;
+        anniversaryDate = new Date(anniversaryDate);
+        return this.service.updateUser(id, {
+          firstName,
+          lastName,
+          email,
+          birthdate,
+          location,
+          timezone,
+          anniversaryDate,
+        });
+      }
 
+      // update user
       return this.service.updateUser(id, {
         firstName,
         lastName,
