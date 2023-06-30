@@ -17,7 +17,7 @@ export class SchedulerService {
         port: process.env.REDIS_PORT || '6379'
       }
     };
-    
+
     
   }
 
@@ -25,8 +25,6 @@ export class SchedulerService {
   async createScheduler(event:Event): Promise<void> {
     const {schedulerId, schedulerOptions} = event;
     const payload = event.message;
-    
-    // console.log(payload, schedulerOptions);
 
     // testing using cron timezone
     const testTZ = { 
@@ -37,6 +35,7 @@ export class SchedulerService {
       },
     };
 
+    // dummy retry options 
     const retryOptions: JobsOptions = {
       attempts: 3,
       backoff: {
@@ -61,13 +60,6 @@ export class SchedulerService {
         console.error('Error:', error.message);
         throw new Error(error);
       }
-
-      // Test using math random to throw error
-      // if (Math.random() < 0.5) {
-      //   console.log('failed', job.data);
-      //   throw new Error('failed');
-      // }
-      // console.log('success', job.data);
     });
 
     const jobs: Job[] = await queueScheduler.getRepeatableJobs();
@@ -75,18 +67,18 @@ export class SchedulerService {
     console.log('scheduler created', schedulerId, payload, schedulerOptions);
   }
 
+  // delete scheduler with scheduler id 
+  // example of scheduler id : eda90b81-b3c9-46e9-9c03-448a64dd6738-birthday
   async deleteScheduler(schedulerId:string): Promise<void> {
     const queueScheduler = new Queue('emailQueue',  this.connectionOptions);
-    console.log('deleteScheduler', schedulerId);
 
+    // get all jobs
     const jobs: any = await queueScheduler.getRepeatableJobs();
 
-    // find by key
-    for(let i = 0; i < jobs.length; i++) {
-      if(jobs[i].name === schedulerId){
-        await queueScheduler.removeRepeatableByKey(jobs[i].key);
-      }
-    }
+    const selectedJob = jobs.filter((job:any) => job.name === schedulerId);
+    console.log('selectedScheduler', selectedJob)
+
+    await queueScheduler.removeRepeatableByKey(selectedJob[0].key)
 
     console.log('scheduler deleted', schedulerId);
   }

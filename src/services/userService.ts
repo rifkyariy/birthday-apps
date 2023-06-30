@@ -6,7 +6,6 @@ import { EventService  } from './eventService';
 
 export class UserService {
   private userRepository: UserRepository;
-  // private eventRepository: EventRepository;
   private eventService: EventService; 
 
   constructor(userRepository: UserRepository, eventService: EventService) {
@@ -62,6 +61,7 @@ export class UserService {
 
   // EVENTS
   // Additional methods
+  // hit the function whenever a user is created, updated, or deleted
   createEvent = (user:User, type:string): Promise<any> => {
    const date = type === 'birthday' ? user.birthdate : user.anniversaryDate;
    const eventDate = date?.getDate();

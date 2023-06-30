@@ -50,7 +50,7 @@ export class EventService {
 
 
   // SCHDULER
-  // Create Scheduler
+  // the scheduler is gonna trigger whenever the event is created, updated and deleted
   createScheduler = async (event: Event): Promise<void> => {
     const schedule = await this.schedulerService.createScheduler(event);
     return schedule;
